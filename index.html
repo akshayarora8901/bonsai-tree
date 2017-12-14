@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="./BonsaiTree.js"></script>
+  <script src="./TreeDragDropPlugin.js"></script>
+  <style>
+  ul {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+    line-height: 0px;
+  }
+
+  .tree--layers {
+    margin-left: 20px;
+  }
+
+  .tree--layers li .row.dragged {
+    background-color: #D9D2E9 !important;
+  }
+  .tree--layers li .row.highlight1 {
+    border-top: 2px solid black;
+  }
+
+  .tree--layers li .row.highlight2 {
+    border: 2px solid black;
+  }
+
+  .tree--layers li .row.highlight3 {
+    border-bottom: 2px solid black;
+  }
+
+  .tree--layers li .row.hover {
+    background-color: rgba(27, 31, 35, 0.5);
+  }
+
+  .tree--layers li .row.active {
+    background-color: #BADA55;
+    color: #000;
+  }
+
+  .tree--layers .no--child {
+    height: 20px;
+  }
+
+  .tree--layers .button {
+    cursor: pointer;
+  }
+
+  .tree--layers .icons {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-size: 100% 100%;
+  }
+
+  .tree--layers .icons.arrow {
+    position: absolute;
+    margin-left: -20px;
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .tree--layers .icons.arrow.hide {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0LjUyIDkiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojOTI5OWE1O308L3N0eWxlPjwvZGVmcz48dGl0bGU+QXNzZXQgMTE8L3RpdGxlPjxnIGlkPSJMYXllcl8yIiBkYXRhLW5hbWU9IkxheWVyIDIiPjxnIGlkPSJMYXllcl81IiBkYXRhLW5hbWU9IkxheWVyIDUiPjxwb2x5Z29uIGNsYXNzPSJjbHMtMSIgcG9pbnRzPSIwLjA1IDkgNC41MiA0LjQ4IDAgMCAwLjA1IDkiLz48L2c+PC9nPjwvc3ZnPg==);
+  }
+
+  .tree--layers .icons.arrow.show {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5IDQuNSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM5Mjk5YTU7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCAxMjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzUiIGRhdGEtbmFtZT0iTGF5ZXIgNSI+PHBvbHlnb24gY2xhc3M9ImNscy0xIiBwb2ludHM9IjAgMCA0LjUgNC41IDkgMCAwIDAiLz48L2c+PC9nPjwvc3ZnPg==);
+  }
+
+  .tree--layers .icons.eye {
+    background-size: 80% 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMy41IDEwLjE0Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6IzU2NWM2Njt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkFzc2V0IDk8L3RpdGxlPjxnIGlkPSJMYXllcl8yIiBkYXRhLW5hbWU9IkxheWVyIDIiPjxnIGlkPSJMYXllcl81IiBkYXRhLW5hbWU9IkxheWVyIDUiPjxnIGlkPSJfR3JvdXBfIiBkYXRhLW5hbWU9IiZsdDtHcm91cCZndDsiPjxwYXRoIGlkPSJfQ29tcG91bmRfUGF0aF8iIGRhdGEtbmFtZT0iJmx0O0NvbXBvdW5kIFBhdGgmZ3Q7IiBjbGFzcz0iY2xzLTEiIGQ9Ik02Ljc5LDBDMi41MywwLDAsNS4wNywwLDUuMDdzMi41Myw1LjA3LDYuNzksNS4wN1MxMy41LDUuMDcsMTMuNSw1LjA3LDExLDAsNi43OSwwWm0wLDguNDVhMy4zOSwzLjM5LDAsMSwxLDMuMzktMy4zOUEzLjM5LDMuMzksMCwwLDEsNi43NSw4LjQ1Wk04LjQzLDUuMDdBMS42OCwxLjY4LDAsMSwxLDYuNzUsMy4zOSwxLjY4LDEuNjgsMCwwLDEsOC40Myw1LjA3WiIvPjwvZz48L2c+PC9nPjwvc3ZnPg==);
+  }
+
+  .tree--layers .icons.svg {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNiYzM5NTg7fS5jbHMtMntmb250LXNpemU6MTBweDtmb250LWZhbWlseTpTb3VyY2VTYW5zUHJvLVNlbWlib2xkLCBTb3VyY2UgU2FucyBQcm87Zm9udC13ZWlnaHQ6NzAwO30uY2xzLTN7bGV0dGVyLXNwYWNpbmc6LTAuMDFlbTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkFzc2V0IDE8L3RpdGxlPjxnIGlkPSJMYXllcl8yIiBkYXRhLW5hbWU9IkxheWVyIDIiPjxnIGlkPSJMYXllcl81IiBkYXRhLW5hbWU9IkxheWVyIDUiPjxyZWN0IGNsYXNzPSJjbHMtMSIgd2lkdGg9IjE5IiBoZWlnaHQ9IjE5Ii8+PHRleHQgY2xhc3M9ImNscy0yIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxLjA1IDEzLjA2KSI+Uzx0c3BhbiBjbGFzcz0iY2xzLTMiIHg9IjUuNDIiIHk9IjAiPlY8L3RzcGFuPjx0c3BhbiB4PSIxMC42NSIgeT0iMCI+RzwvdHNwYW4+PC90ZXh0PjwvZz48L2c+PC9zdmc+);
+  }
+
+  .tree--layers .icons.g {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNiYWRhNTU7fS5jbHMtMiwuY2xzLTN7ZmlsbDpub25lO3N0cm9rZTojMTgxYjFlO3N0cm9rZS1taXRlcmxpbWl0OjEwO30uY2xzLTN7c3Ryb2tlLWRhc2hhcnJheToxLjYgMS42O308L3N0eWxlPjwvZGVmcz48dGl0bGU+QXNzZXQgMjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzUiIGRhdGEtbmFtZT0iTGF5ZXIgNSI+PHJlY3QgY2xhc3M9ImNscy0xIiB3aWR0aD0iMTkiIGhlaWdodD0iMTkiLz48cG9seWxpbmUgY2xhc3M9ImNscy0yIiBwb2ludHM9IjE0LjUgMTMuNSAxNC41IDE0LjUgMTMuNSAxNC41Ii8+PGxpbmUgY2xhc3M9ImNscy0zIiB4MT0iMTEuOSIgeTE9IjE0LjUiIHgyPSI2LjMiIHkyPSIxNC41Ii8+PHBvbHlsaW5lIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSI1LjUgMTQuNSA0LjUgMTQuNSA0LjUgMTMuNSIvPjxsaW5lIGNsYXNzPSJjbHMtMyIgeDE9IjQuNSIgeTE9IjExLjkiIHgyPSI0LjUiIHkyPSI2LjMiLz48cG9seWxpbmUgY2xhc3M9ImNscy0yIiBwb2ludHM9IjQuNSA1LjUgNC41IDQuNSA1LjUgNC41Ii8+PGxpbmUgY2xhc3M9ImNscy0zIiB4MT0iNy4xIiB5MT0iNC41IiB4Mj0iMTIuNyIgeTI9IjQuNSIvPjxwb2x5bGluZSBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMTMuNSA0LjUgMTQuNSA0LjUgMTQuNSA1LjUiLz48bGluZSBjbGFzcz0iY2xzLTMiIHgxPSIxNC41IiB5MT0iNy4xIiB4Mj0iMTQuNSIgeTI9IjEyLjciLz48L2c+PC9nPjwvc3ZnPg==);
+  }
+
+  .tree--layers .icons.line {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlOiNiYWRhNTU7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCAzPC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iNC41IiB5PSI5LjUiIHdpZHRoPSIxMCIgaGVpZ2h0PSIwLjAxIi8+PC9nPjwvZz48L3N2Zz4=);
+  }
+
+  .tree--layers .icons.polyline {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOiNiYWRhNTU7fS5jbHMtMywuY2xzLTR7ZmlsbDpub25lO3N0cm9rZS1taXRlcmxpbWl0OjEwO30uY2xzLTN7c3Ryb2tlOiNmZmY7fS5jbHMtNHtzdHJva2U6I2JhZGE1NTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkFzc2V0IDQ8L3RpdGxlPjxnIGlkPSJMYXllcl8yIiBkYXRhLW5hbWU9IkxheWVyIDIiPjxnIGlkPSJMYXllcl81IiBkYXRhLW5hbWU9IkxheWVyIDUiPjxyZWN0IGNsYXNzPSJjbHMtMSIgd2lkdGg9IjE5IiBoZWlnaHQ9IjE5Ii8+PHJlY3QgY2xhc3M9ImNscy0yIiB4PSIyIiB5PSIxMSIgd2lkdGg9IjMiIGhlaWdodD0iMyIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iOCIgeT0iNSIgd2lkdGg9IjMiIGhlaWdodD0iMyIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iMTQiIHk9IjExIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTUsMTIiLz48cG9seWxpbmUgY2xhc3M9ImNscy00IiBwb2ludHM9IjQgMTIgOS41IDYuNSAxNSAxMiIvPjwvZz48L2c+PC9zdmc+);
+  }
+
+  .tree--layers .icons.rect {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlOiNiYWRhNTU7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCA1PC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iNS41IiB5PSI1LjUiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiLz48L2c+PC9nPjwvc3ZnPg==);
+  }
+
+  .tree--layers .icons.circle {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlOiNiYWRhNTU7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCA2PC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iNC41IiB5PSI0LjUiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjUiIHJ5PSI1Ii8+PC9nPjwvZz48L3N2Zz4=);
+  }
+
+  .tree--layers .icons.polygon {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlOiNiYWRhNTU7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCA3PC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSI5LjU3IDIuODIgMTEuNDMgNi43NyAxNS41NyA3LjQgMTIuNTcgMTAuNDggMTMuMjggMTQuODIgOS41NyAxMi43NyA1Ljg2IDE0LjgyIDYuNTcgMTAuNDggMy41NyA3LjQgNy43MiA2Ljc3IDkuNTcgMi44MiIvPjwvZz48L2c+PC9zdmc+);
+  }
+
+  .tree--layers .icons.text {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlOiNiYWRhNTU7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCA4PC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iNS41IiB5PSI5LjQ5IiB3aWR0aD0iOCIgaGVpZ2h0PSIwLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDE5KSByb3RhdGUoLTkwKSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iNS41IiB5PSI1LjQ5IiB3aWR0aD0iOCIgaGVpZ2h0PSIwLjAxIi8+PC9nPjwvZz48L3N2Zz4=);
+  }
+
+  .tree--layers .icons.path {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOSAxOSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMxYjFmMjM7fS5jbHMtMntmaWxsOiNiYWRhNTU7fS5jbHMtMywuY2xzLTR7ZmlsbDpub25lO3N0cm9rZS1taXRlcmxpbWl0OjEwO30uY2xzLTN7c3Ryb2tlOiNmZmY7fS5jbHMtNHtzdHJva2U6I2JhZGE1NTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkFzc2V0IDE0PC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iTGF5ZXJfNSIgZGF0YS1uYW1lPSJMYXllciA1Ij48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iMiIgeT0iMTEiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiLz48cmVjdCBjbGFzcz0iY2xzLTIiIHg9IjExIiB5PSIyIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTUsMTIiLz48cGF0aCBjbGFzcz0iY2xzLTQiIGQ9Ik01LDEyLjQzSDdzNS41LjA3LDUuNS01LjVWNS4xNCIvPjxsaW5lIGNsYXNzPSJjbHMtNCIgeDE9IjE2IiB5MT0iNyIgeDI9IjciIHkyPSIxNiIvPjwvZz48L2c+PC9zdmc+);
+  }
+
+  .tree--layers span {
+    position: absolute;
+    height: 20px;
+    padding-left: 20px;
+    line-height: 1em;
+    padding-top: 3px;
+  }
+
+  .tree--layers .buttons--container {
+    float: right;
+  }
+
+  .tree--layers .buttons--container .button {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    float: left;
+    background-size: 100% 100%;
+    padding-top: 12px;
+    text-align: center;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .tree--layers .buttons--container .button.moreBtn {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNyAyMS4zMSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtvcGFjaXR5OjAuMjt9LmNscy0ye2ZpbGw6IzkyOTlhNTt9LmNscy0ze2ZvbnQtc2l6ZToxOHB4O2ZpbGw6IzI4MmMzNTtmb250LWZhbWlseTpTb3VyY2VTYW5zUHJvLVNlbWlib2xkLCBTb3VyY2UgU2FucyBQcm87Zm9udC13ZWlnaHQ6NzAwO2xldHRlci1zcGFjaW5nOi0wLjA0ZW07fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCAxMDwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzUiIGRhdGEtbmFtZT0iTGF5ZXIgNSI+PGcgY2xhc3M9ImNscy0xIj48Y2lyY2xlIGNsYXNzPSJjbHMtMiIgY3g9IjguNSIgY3k9IjEyLjczIiByPSI4LjUiLz48dGV4dCBjbGFzcz0iY2xzLTMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEuNzkgMTQuOTQpIj4uLi48L3RleHQ+PC9nPjwvZz48L2c+PC9zdmc+);
+    background-position: 0px -2.5px;
+  }
+
+  .tree--layers .buttons--container .button.mqBtn {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNyAxNyI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM5Mjk5YTU7fS5jbHMtMntmaWxsOiMyODJjMzU7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5Bc3NldCAxMzwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzUiIGRhdGEtbmFtZT0iTGF5ZXIgNSI+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSI4LjUiIGN5PSI4LjUiIHI9IjguNSIvPjxyZWN0IGNsYXNzPSJjbHMtMiIgeD0iMyIgeT0iNSIgd2lkdGg9IjExIiBoZWlnaHQ9IjMiLz48cmVjdCBjbGFzcz0iY2xzLTIiIHg9IjMiIHk9IjEwIiB3aWR0aD0iNiIgaGVpZ2h0PSIzIi8+PC9nPjwvZz48L3N2Zz4=);
+    display: none;
+    background-size: 74% 74%;
+  }
+
+  .tree--layers .buttons--container .button.mqBtn.visible {
+    display: inline-block;
+  }
+
+  </style>
+</head>
+
+<body>
+  <ul class="tree--layers">
+  </ul>
+  <script>
+  var data = {
+    "attributes": {
+      "version": "1.1",
+      "id": "Layer_1",
+      "xmlns": "http://www.w3.org/2000/svg",
+      "xmlns:xlink": "http://www.w3.org/1999/xlink",
+      "x": "0px",
+      "y": "0px",
+      "width": "400px",
+      "height": "400px",
+      "viewBox": "0 0 400 400",
+      "enable-background": "new 0 0 400 400",
+      "xml:space": "preserve"
+    },
+    "runtime": {
+      "level": 1
+    },
+    "display": "block",
+    "variations": {
+      "default": {},
+      "<460": {},
+      "<720": {},
+      "<960": {}
+    },
+    "__clazz": "SvgDataNode",
+    "type": "svg",
+    "id": "Layer_1",
+    "content": "",
+    "children": [{
+        "attributes": {},
+        "display": "block",
+        "variations": {
+          "default": {},
+          "<460": {},
+          "<720": {},
+          "<960": {}
+        },
+        "__clazz": "SvgDataNode",
+        "type": "g",
+        "id": "uid-1377",
+        "content": "",
+        "runtime": {
+          "level": 2
+        },
+        "children": [{
+            "attributes": {
+              "x": "10",
+              "y": "50",
+              "fill": "#53DBD1",
+              "width": "40",
+              "height": "40"
+            },
+            "display": "block",
+            "runtime": {
+              "level": 3
+            },
+            "variations": {
+              "default": {},
+              "<460": {},
+              "<720": {},
+              "<960": {}
+            },
+            "__clazz": "SvgDataNode",
+            "type": "rect",
+            "id": "uid-1456",
+            "content": ""
+          },
+          {
+            "attributes": {
+              "fill": "#F9E169",
+              "cx": "200",
+              "cy": "73",
+              "r": "25"
+            },
+            "runtime": {
+              "level": 3
+            },
+            "display": "block",
+            "variations": {
+              "default": {},
+              "<460": {},
+              "<720": {},
+              "<960": {}
+            },
+            "__clazz": "SvgDataNode",
+            "type": "circle",
+            "id": "uid-1528",
+            "content": ""
+          },
+          {
+            "attributes": {
+              "x": "81",
+              "y": "150",
+              "fill": "#BADA55",
+              "width": "80",
+              "height": "40"
+            },
+            "runtime": {
+              "level": 3
+            },
+            "display": "block",
+            "variations": {
+              "default": {},
+              "<460": {},
+              "<720": {},
+              "<960": {}
+            },
+            "__clazz": "SvgDataNode",
+            "type": "rect",
+            "id": "uid-1638",
+            "content": ""
+          },
+          {
+            "attributes": {
+              "x": "100",
+              "y": "200",
+              "transform": "translate(50,50)",
+              "fill": "red",
+              "width": "80",
+              "height": "80"
+            },
+            "display": "block",
+            "runtime": {
+              "level": 3
+            },
+            "variations": {
+              "default": {},
+              "<460": {},
+              "<720": {},
+              "<960": {}
+            },
+            "__clazz": "SvgDataNode",
+            "type": "rect",
+            "id": "uid-7414",
+            "content": ""
+          },
+          {
+            "attributes": {
+              "fill": "#DB8DCB",
+              "points": "301,36.6 312.3,59.5 337.5,63.1 319.3,80.9 323.6,106.1 301,94.2 278.4,106.1 282.7,80.9\n        264.5,63.1 289.7,59.5 \t"
+            },
+            "display": "block",
+            "runtime": {
+              "level": 3
+            },
+            "variations": {
+              "default": {},
+              "<460": {},
+              "<720": {},
+              "<960": {}
+            },
+            "__clazz": "SvgDataNode",
+            "type": "polygon",
+            "id": "uid-5318",
+            "content": ""
+          }
+        ]
+      },
+      {
+        "attributes": {},
+        "display": "block",
+        "variations": {
+          "default": {},
+          "<460": {},
+          "<720": {},
+          "<960": {}
+        },
+        "__clazz": "SvgDataNode",
+        "type": "g",
+        "id": "Layer_1",
+        "content": "",
+        "runtime": {
+          "level": 2
+        },
+        "children": [{
+          "attributes": {
+            "style": "fill:#BADA55;",
+            "points": "270.2,73.7 204.1,54.8 196.7,42 167.4,33.1 163.7,36.4 124.7,85.2 124.7,85.2 162.2,38.2 \n\t155.8,36.4 124.7,85.2 124.6,85.2 0,0 34.9,99.3 69.5,136.9 74.8,150.7 26,199.1 20,213.5 7.4,239.2 20,248.5 36.7,235 53.5,221 \n\t62.3,199.1 117.6,185.5 143.4,145.9 169.3,114.2 169.3,110.5 170.2,85.3 194.8,77.9 201.2,70.4 "
+          },
+          "display": "block",
+          "runtime": {
+            "level": 3
+          },
+          "variations": {
+            "default": {},
+            "<460": {},
+            "<720": {},
+            "<960": {}
+          },
+          "__clazz": "SvgDataNode",
+          "type": "polygon",
+          "id": "uid-1683",
+          "content": ""
+        }]
+      }
+    ]
+  }
+  var ul$ = $('.tree--layers');
+  var bonsaiTree = new BonsaiTree(data, ul$);
+  var dragAndDropPlugin = new DragAndDropPlugin(ul$[0]);
+  bonsaiTree.registerPlugin(dragAndDropPlugin);
+  // Bonsai Template
+  bonsaiTree.nodeTemplate = function(data) {
+    // Arrow icons for nodes having children
+    var tpl = `<li class="${!(data.children && data.children.length) ? 'no--child' : ''}">
+      <div cbri-id="layer" select-id="${data.id}" class="row" draggable="true" ondrop>
+        ${data.children && data.children.length ? '<div cbri-id="arrow" class="icons arrow show"></div>' : ''}
+        <div class="icons ${data.type}"></div>
+        <div cbri-id="eyeButton" class="button icons eye"></div>
+        <span cbri-id="tagNameOrId" style="padding-left:${20*data.runtime.level}px" ondrop>${data.id && data.id.substr(0,3) != "uid" ? data.id : "&lt;"+data.type+"&gt;"}</span>
+        
+      </div>
+      </li>
+    `;
+    return $(tpl).data('data', data);
+  };
+
+  bonsaiTree.logic = function(ul$) {
+    // Setup event handlers
+    ul$.unbind().on('click', function(evt) {
+      evt.stopPropagation();
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      switch (cbriId) {
+        case 'layer':
+          // console.log('layer was clicked', data);
+          // Select row
+          $('.row', ul$).removeClass('active');
+          target$.addClass('active');
+          break;
+        case 'arrow':
+          // console.log('arrow was clicked', data);
+          if (target$.hasClass("hide")) {
+            target$.removeClass("hide");
+            target$.addClass("show");
+            target$.parent().next("ul").show();
+          } else if (target$.hasClass("show")) {
+            target$.removeClass("show");
+            target$.addClass("hide");
+            target$.parent().next("ul").hide();
+          }
+          break;
+        default:
+      }
+    });
+    ul$.on('dragstart', function(evt) {
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      if (cbriId == "layer" || cbriId == "tagNameOrId")
+        bonsaiTree.execPlugin(BonsaiTree.pluginHooks.ELEMENT_DRAGSTART, { "event": evt, nodeData: data });
+    });
+    ul$.on('drag', function(evt) {
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      if (cbriId == "layer" || cbriId == "tagNameOrId")
+        bonsaiTree.execPlugin(BonsaiTree.pluginHooks.ELEMENT_DRAG, { "event": evt, nodeData: data });
+    });
+    ul$.on('dragend', function(evt) {
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      if (cbriId == "layer" || cbriId == "tagNameOrId")
+        bonsaiTree.execPlugin(BonsaiTree.pluginHooks.ELEMENT_DRAGEND, { "event": evt, nodeData: data });
+    });
+    ul$.on('dragover', function(evt) {
+      evt.preventDefault();
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      if (cbriId == "layer" || cbriId == "tagNameOrId")
+        bonsaiTree.execPlugin(BonsaiTree.pluginHooks.ELEMENT_DRAGOVER, { "event": evt, nodeData: data });
+    });
+    ul$.on('drop', function(evt) {
+      var target$ = $(evt.target),
+        cbriId = target$.first().attr('cbri-id'),
+        data = target$.is('li') ? target$.data('data') : target$.closest('li').data('data');
+      if (cbriId == "layer" || cbriId == "tagNameOrId") {
+        bonsaiTree.execPlugin(BonsaiTree.pluginHooks.ELEMENT_DROP, { "event": evt, nodeData: data });
+        bonsaiTree.render();
+      }
+
+    });
+  }
+  // Bonsai destroy
+  bonsaiTree.destroy = function(ul$) {
+    // TODO: Make sure to destroy everything manually. (e.g plugins)
+    // Remove all event listeners and Destroy the current bonsai tree
+    if (ul$ && ul$.length) {
+      ul$.find("*").off();
+      ul$.empty();
+    }
+  };
+  bonsaiTree.render();
+  </script>
+</body>
+
+</html>
